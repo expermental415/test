@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WAY</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+/* --- باقي التنسيقات كما هي --- */
+body {
+    font-size: 16px;
+    background: #e0e0e0;
+    color: #333;
+    min-height: 100vh;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* ... (باقي التنسيقات من الملف الأصلي لم تتغير) ... */
+
+/* زيادة حجم الأسهم إن رغبت */
+.nav-btn i {
+    font-size: 1.3em;
+    vertical-align: middle;
+}
+.navigation-bar-fixed-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 7px;
+    background: #fff;
+    z-index: 30;
+    padding: 7px 0 7px 0;
+    margin: 0 -12px 10px -12px;
+    border-bottom: 1px solid #e0e0e0;
+    flex-direction: row;
+}
+.nav-btn {
+    padding: 5px 13px;
+    background: #2e7d52;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s;
+    min-width: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.nav-btn:disabled { background: #cccccc; cursor: not-allowed;}
+.nav-btn:hover:not(:disabled) {
+    background: #1e5e3b; transform: translateY(-2px);
+}
+</style>
+</head>
+<body>
+<audio id="click-audio" src="https://cdn.pixabay.com/audio/2022/11/16/audio_12bfa6f1e1.mp3"></audio>
+<div class="container">
+<header>
+<h1>WAY</h1>
+</header>
+<div class="loading" id="loading">
+<i class="fas fa-spinner fa-spin"></i> جاري تحميل بيانات الاختبار...
+</div>
+<div class="subject-selection" id="subject-section" style="display: none;">
+<h2>اختر المادة:</h2>
+<div class="selection-container">
+<select id="subject-select"></select>
+<select id="column10-info"></select>
+<select id="column11-select" style="display:none"></select>
+</div>
+<button class="start-btn" id="start-btn">بدء الاختبار</button>
+</div>
+<div class="exam-section" id="exam-section">
+<div class="subject-name" id="subject-name"></div>
+<div class="progress-text">السؤال <span id="current-q">1</span> من <span id="total-qs">0</span></div>
+<div class="progress-slider-bar">
+<div class="slider-labels left"><span>1</span></div>
+<input class="slider" id="question-slider" max="10" min="1" type="range" value="10"/>
+<div class="slider-labels right"><span id="max-question">10</span></div>
+</div>
+<!-- تعديل: ترتيب الأزرار ليكون السابق يمين والتالي يسار مع استبدال النص بأسهم -->
+<div class="navigation-bar-fixed-top" id="nav-top-bar">
+    <button class="nav-btn" disabled="" id="prev-btn" title="السابق">
+        <i class="fa-solid fa-arrow-right"></i>
+    </button>
+    <button class="show-featured-btn" id="show-featured-btn" title="عرض المميزة"><i class="fa-regular fa-star"></i> عرض المميزة</button>
+    <button class="solve-mode-btn" id="solve-mode-btn" title="إظهار الحلول"><i class="fa-solid fa-check-double"></i></button>
+    <button class="home-btn" id="nav-home-btn" title="الصفحة الرئيسية"><i class="fas fa-home"></i></button>
+    <button class="nav-btn" id="next-btn" title="التالي">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+</div>
+<div class="question-container" id="question-container">
+<div class="question-header-bar">
+<button class="star-btn" id="star-btn" title="تمييز السؤال">
+<i class="fa-regular fa-star"></i>
+</button>
+<div class="question-text" id="question-text"></div>
+</div>
+<div class="options-container" id="options-container"></div>
+<div class="question-explanation" id="question-explanation" style="display:none;"></div>
+<button class="info-btn" id="info-btn" title="عرض الشرح"><i class="fa-solid fa-circle-info"></i></button>
+<button class="info-btn" id="show-answer-btn" title="إظهار الإجابة الصحيحة"><i class="fa-solid fa-check"></i></button>
+</div>
+<button class="bottom-back-btn" id="bottom-back-btn" style="display:none">
+<i class="fas fa-home"></i> العودة للبداية
+</button>
+</div>
+<div class="results-section" id="results-section">
+<h2>لقد أكملت الاختبار!</h2>
+<p>درجتك النهائية هي:</p>
+<div class="score" id="score">0/0</div>
+<button class="restart-btn" id="restart-btn">إعادة الاختبار</button>
+<button class="bottom-back-btn" id="results-back-btn">
+<i class="fas fa-home"></i> العودة للبداية
+</button>
+</div>
+</div>
+<script>
+// ... كل الكود كما هو حتى دالة updateNavigationButtons ...
+function updateNavigationButtons() {
+    const displayed = getDisplayedQuestions();
+    prevBtn.disabled = currentQuestionIndex === 0 || displayed.length === 0;
+    nextBtn.disabled = displayed.length === 0;
+    // عند آخر سؤال، يبقى السهم فقط (يمكن إضافة تأثير لون إذا رغبت)
+    if (currentQuestionIndex === displayed.length - 1) {
+        nextBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+        nextBtn.title = 'إنهاء الاختبار';
+    } else {
+        nextBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+        nextBtn.title = 'التالي';
+    }
+    prevBtn.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
+    prevBtn.title = 'السابق';
+}
+// ... باقي السكريبت كما هو ...
+</script>
+</body>
+</html>
