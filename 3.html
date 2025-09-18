@@ -250,7 +250,7 @@ select {
     vertical-align: middle;
 }
 
-/* زر عرض المميزة بشكل نجمة فقط */
+/* زر عرض المميزة بشكل نجمة فقط فضية عند الإيقاف وذهبية عند التفعيل */
 .show-featured-btn {
     padding: 0;
     background: none;
@@ -270,13 +270,30 @@ select {
 .show-featured-btn i {
     font-size: 23px;
     transition: color 0.2s;
-    color: #ffd70022; /* نجمة مفرغة باهتة */
+    color: silver;
 }
 .show-featured-btn.active i {
-    color: #ffd700; /* نجمة ذهبية عند التفعيل */
+    color: #ffd700;
 }
 .show-featured-btn:focus {
     outline: none;
+}
+
+.solve-mode-btn {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 2px 8px;
+    color: silver;
+    transition: color 0.2s;
+}
+.solve-mode-btn.active {
+    color: #4caf50;
+}
+.solve-mode-btn:hover {
+    background: #f1f1f1;
+    border-radius: 50%;
 }
 
 .home-btn {
@@ -349,22 +366,6 @@ select {
 }
 #show-answer-btn:hover {
     color: #1e5e3b;
-}
-.solve-mode-btn {
-    background: none;
-    border: none;
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 2px 8px;
-    color: silver;
-    transition: color 0.2s;
-}
-.solve-mode-btn.active {
-    color: #4caf50;
-}
-.solve-mode-btn:hover {
-    background: #f1f1f1;
-    border-radius: 50%;
 }
 </style>
 </head>
