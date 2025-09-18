@@ -249,8 +249,6 @@ select {
     font-size: 1.3em;
     vertical-align: middle;
 }
-
-/* زر عرض المميزة بشكل نجمة فقط فضية عند الإيقاف وذهبية عند التفعيل */
 .show-featured-btn {
     padding: 0;
     background: none;
@@ -278,7 +276,6 @@ select {
 .show-featured-btn:focus {
     outline: none;
 }
-
 .solve-mode-btn {
     background: none;
     border: none;
@@ -295,7 +292,6 @@ select {
     background: #f1f1f1;
     border-radius: 50%;
 }
-
 .home-btn {
     background: none;
     border: none;
@@ -963,22 +959,30 @@ function getDisplayedQuestions() {
             showResults();
         }
     });
-    // مؤشر السحب - التصاق الدائرة بنهاية الخط الأخضر
+    // مؤشر السحب - التصاق الدائرة بنهاية الخط الأخضر مع أي عدد أسئلة
     function updateProgressAndSlider() {
         const displayedQuestions = getDisplayedQuestions();
-        let percent = 0;
-        if (displayedQuestions.length > 0) {
-            percent = ((currentQuestionIndex + 1) / displayedQuestions.length) * 100;
-        }
-        const slider = document.querySelector('.slider');
-        if (slider) {
-            const sliderWidth = slider.offsetWidth;
-            const thumbWidth = 22; // نفس القيمة في CSS
-            const halfThumbPercent = (thumbWidth / 2) / sliderWidth * 100;
-            let progressThumb = percent + halfThumbPercent - (percent * thumbWidth / sliderWidth / 100);
-            if (progressThumb > 100) progressThumb = 100;
-            slider.style.setProperty('--progress-thumb', progressThumb + '%');
-        }
+        let slider = document.querySelector('.slider');
+        let min = Number(slider.min);
+        let max = Number(slider.max);
+        let value = Number(slider.value);
+
+        // موقع الدائرة كنسبة (0 في البداية، 1 في النهاية)
+        let position = (value - min) / (max - min);
+
+        // حساب العرض بدقة
+        const sliderWidth = slider.offsetWidth;
+        const thumbWidth = 22; // كما في CSS
+        const halfThumbPercent = (thumbWidth / 2) / sliderWidth * 100;
+
+        // النسبة التي تجعل الخط الأخضر ينتهي عند منتصف الدائرة دائماً
+        let progressThumb = position * (100 - (thumbWidth / sliderWidth * 100)) + halfThumbPercent;
+
+        // حماية من أي خطأ رياضي في الأطراف
+        if (progressThumb < halfThumbPercent) progressThumb = halfThumbPercent;
+        if (progressThumb > 100 - halfThumbPercent) progressThumb = 100 - halfThumbPercent;
+
+        slider.style.setProperty('--progress-thumb', progressThumb + '%');
     }
     function showResults() {
         let score = 0;
@@ -1014,4 +1018,4 @@ function getDisplayedQuestions() {
 });
 </script>
 </body>
-  </html>
+</html>
